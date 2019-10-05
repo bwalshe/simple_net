@@ -59,42 +59,8 @@ struct LabeledImage {
 
 struct IdxContents {
 
-  ~IdxContents() { delete _labels; }
-
-  int numImages() { return _images.size(); }
-  uint8_t numClasses() {
-    return *std::max_element(_labels, _labels + numImages()) + 1;
-  }
-  int imageWidth() { return _imgWidth; }
-  int imageHeight() { return _imgHeight; }
-
-  RowVectorXf image(const size_t i) { return _images.at(i); }
-  LabeledImage labelledImage(const size_t i) { return {image(i), label(i)}; }
-
-  uint8_t label(const size_t i) { return _labels[i]; }
-
-  void printSummary() {
-    std::cout << "Read " << numImages() << " images." << std::endl;
-    std::cout << "Image size is " << _imgWidth << " by " << _imgHeight
-              << " pixels." << std::endl
-              << "There are " << numClasses() << " different lable values."
-              << std::endl;
-  }
-
-  static IdxContents *fromPath(const char *imagePath, const char *labelPath) {
-    gzFile imageFile, labelFile;
-    imageFile = openFile(imagePath);
-    labelFile = openFile(labelPath);
-
-    return new IdxContents(imageFile, labelFile);
-  }
-
-private:
-  size_t _numImages;
-  size_t _imgWidth;
-  size_t _imgHeight;
-  std::vector<RowVectorXf> _images;
-  uint8_t *_labels;
+  IdxContents(const char *imagePath, const char *labelPath):
+    IdxContents(openFile(imagePath), openFile(labelPath)){}
 
   IdxContents(const gzFile &imageFile, const gzFile &labelFile) {
     checkMagic(imageFile, IMAGE_MAGIC);
@@ -122,6 +88,46 @@ private:
     }
   }
 
+  ~IdxContents() {
+    delete _labels; }
+
+  int numImages() {
+    return _images.size(); }
+  uint8_t numClasses() {
+    return *std::max_element(_labels, _labels + numImages()) + 1;
+  }
+  int imageWidth() {
+    return _imgWidth; }
+  int imageHeight() {
+    return _imgHeight; }
+
+  RowVectorXf image(const size_t i) {
+    return _images.at(i); }
+  LabeledImage labelledImage(const size_t i) {
+    return {image(i), label(i)}; }
+
+  uint8_t label(const size_t i) {
+    return _labels[i]; }
+
+  void printSummary() {
+    std::cout << "Read " << numImages() << " images." << std::endl;
+    std::cout << "Image size is " << _imgWidth << " by " << _imgHeight
+              << " pixels." << std::endl
+              << "There are " << numClasses() << " different lable values."
+              << std::endl;
+  }
+
+  
+
+private:
+  size_t _numImages;
+  size_t _imgWidth;
+  size_t _imgHeight;
+  std::vector<RowVectorXf> _images;
+  uint8_t *_labels;
+
+  
+
   static void checkMagic(const gzFile &inFile, uint32_t expected) {
     uint32_t magic = readUint32(inFile);
     if (magic != expected) {
@@ -144,8 +150,7 @@ uint32_t readUint32(const gzFile &inFile) {
   int err;
   size_t len = sizeof(num);
   if (gzread(inFile, &num, len) != len) {
-    fprintf(stderr, "gzread err: %s\n", gzerror(inFile, &err));
-    exit(1);
+    throw IdxLoadException(gzerror(inFile, &err));
   }
   return be32toh(num);
 }

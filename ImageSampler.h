@@ -10,11 +10,24 @@ using Eigen::MatrixXf;
 using Eigen::MatrixXi;
 using Eigen::RowVectorXf;
 
+class OneHotEncoder {
+public:
+  OneHotEncoder(uint max){
+    _rows = MatrixXf::Identity(max, max);
+  }
+
+  RowVectorXf encode(uint x) {
+    return _rows.row(x);
+  }
+
+private:
+  MatrixXf _rows;
+};
 
 class ImageSampler {
 public:
   ImageSampler(const char *imagePath, const char *labelPath) {
-    data = IdxContents::fromPath(imagePath, labelPath);
+    data = new IdxContents(imagePath, labelPath);
   }
 
   ~ImageSampler() { delete data; }
@@ -23,15 +36,17 @@ public:
 
   uint8_t targetWidth() { return data->numClasses(); }
 
+  size_t totalImages() { return data->numImages(); }
+
   std::pair<MatrixXf, MatrixXf> nextSample(size_t count) {
     MatrixXf images(count, inputWidth());
     MatrixXf labels(count, targetWidth());
-    MatrixXf oneHotRows = MatrixXf::Identity(targetWidth(), targetWidth());
+    OneHotEncoder encoder = OneHotEncoder(targetWidth());
 
     for (size_t i = 0; i < count; ++i) {
       auto randIndex = nextRandomIndex();
       images.row(i) = data->image(randIndex);
-      labels.row(i) = oneHotRows.row(data->label(randIndex));
+      labels.row(i) = encoder.encode(data->label(randIndex));
     }
     return std::pair<MatrixXf, MatrixXf>(images, labels);
   }

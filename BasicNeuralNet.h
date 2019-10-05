@@ -65,13 +65,16 @@ public:
           activations[i - 1].colwise().sum() / batchSize;
       weights[i - 1] += activationSum.transpose() * delta;
     }
-    return (activations.back() - y).squaredNorm() / batchSize;
+    errors = activations.back() - y;
+    // std::cout << errors << std::endl;
+    // std::cout << errors.squaredNorm() / batchSize << std::endl;
+    return errors.squaredNorm() / batchSize;
   }
 
   MatrixXf feed(const MatrixXf &x) {
     MatrixXf out(x);
     for (auto i = 0; i < numLayers(); ++i) {
-      out = (out * weights[i]).rowwise() + biases[i];
+      out = activation((out * weights[i]).rowwise() + biases[i]);
     }
     return out;
   }
