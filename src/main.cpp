@@ -9,11 +9,12 @@
 #include <simple_nnet/IdxLoader.h>
 #include <simple_nnet/ImageSampler.h>
 
+// #define PRINT_STATE
 #define BATCH_SIZE 100
 #define NUM_BATCHES 10000
-#define EPOCHS 20
+#define EPOCHS 10
 #define HIDDEN_LAYER_SIZE 30
-#define GRADIENT_DELTA 0.0001f
+#define GRADIENT_DELTA 0.001f
 #define DELTA_DECAY 0.6f
 #define TEST_SIZE 10
 
@@ -37,6 +38,10 @@ int main(int argc, char **argv) {
   Network net(trainImages.inputWidth(), HIDDEN_LAYER_SIZE);
   net.addLayer(trainImages.targetWidth());
 
+#ifdef PRINT_STATE
+  net.printStructure();
+#endif
+
   float delta = GRADIENT_DELTA;
   for (auto i = 0; i < NUM_BATCHES; ++i) {
     std::pair<MatrixXf, MatrixXf> sample = trainImages.nextSample(BATCH_SIZE);
@@ -57,6 +62,7 @@ int main(int argc, char **argv) {
   for (auto i = 0; i < TEST_SIZE; ++i) {
 
     MatrixXf result = net.feed(testImages.image(i));
+
     MatrixXf expected = encoder.encode(testImages.label(i));
     MatrixXf errors = expected - result;
     std::cout << "Label: " << (int)testImages.label(i)

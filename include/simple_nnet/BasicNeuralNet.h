@@ -1,6 +1,9 @@
 #ifndef BASIC_NEURAL_NET_H
 #define BASIC_NEURAL_NET_H
 
+#include <memory>
+#include <simple_nnet/Layer.h>
+
 using Eigen::MatrixXf;
 using Eigen::RowVectorXf;
 
@@ -9,11 +12,11 @@ class Network {
 public:
   Network(const int inputWidth, const int outputWidth);
 
-  int layerSize(const int i) const { return weights[i].cols(); }
+  int layerSize(const int i) const { return _layers[i]->outputWidth(); }
 
   void addLayer(const int width);
 
-  size_t numLayers() const { return weights.size(); }
+  size_t numLayers() const { return _layers.size(); }
 
   void printStructure() const;
 
@@ -22,14 +25,8 @@ public:
   MatrixXf feed(const MatrixXf &x) const;
 
 private:
-  std::vector<MatrixXf> weights;
-  std::vector<RowVectorXf> biases;
-
+  std::vector<std::unique_ptr<ILayer>> _layers;
   int inputWidth;
-
-  static inline MatrixXf activation(const MatrixXf &m);
-
-  static inline MatrixXf dActivation(MatrixXf &m);
 };
 
 #endif // BASIC_NEURAL_NET_H

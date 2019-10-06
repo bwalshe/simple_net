@@ -19,7 +19,7 @@ IdxContents::IdxContents(const gzFile &imageFile, const gzFile &labelFile) {
       throw IdxLoadException::imageFail(i, _numImages);
     }
     _images.push_back(
-        Matrix<uint8_t, 1, Dynamic>::Map(data, imgSize).cast<float>() / 256);
+        Matrix<uint8_t, 1, Dynamic>::Map(data, imgSize).cast<float>() / 128);
   }
   _labels = std::make_unique<uint8_t[]>(_numImages);
   if (gzread(labelFile, _labels.get(), _numImages) != _numImages) {

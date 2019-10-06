@@ -55,8 +55,6 @@ struct IdxContents {
 
   IdxContents(const gzFile &imageFile, const gzFile &labelFile);
 
-  // ~IdxContents() { delete _labels; }
-
   int numImages() const { return _images.size(); }
   uint8_t numClasses() const {
     return *std::max_element(_labels.get(), _labels.get() + numImages()) + 1;
