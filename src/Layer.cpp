@@ -1,30 +1,32 @@
 #include <iostream>
 #include <simple_nnet/Layer.h>
 
-float relu(float x) { return x > 0 ? x : 0; }
+float sigmoid(float x) { 
+    return 1.0f / (1.0f + exp(-x)); 
+}
 
-float dRelu(float x) { return x > 0 ? 1.0f : 0.0f; }
+float dSigmoid(float x) { 
+    return sigmoid(x)*(1-sigmoid(x));
+}
 
-void ReluLayer::print() const {
+void SigmoidLayer::print() const {
   std::cout << "=== Layer " << _level << " ======" << std::endl;
   std::cout << "weights: " << std::endl << _weights << std::endl;
   std::cout << "bias: " << _bias << std::endl;
   std::cout << "====================" << std::endl << std::endl;
 }
 
-const MatrixXf &ReluLayer::activationUpdate(const MatrixXf &input) {
-  _batchSize = input.rows();
+const MatrixXf SigmoidLayer::activationUpdate(const MatrixXf &input) {
   _input = input;
   _currentZeds = (input * _weights).rowwise() + _bias;
-  _currentActivation = _currentZeds.unaryExpr(std::ref(relu));
-  return _currentActivation;
+  return _currentZeds.unaryExpr(std::ref(sigmoid));
 }
 
-MatrixXf ReluLayer::activation(const MatrixXf &input) const {
+MatrixXf SigmoidLayer::activation(const MatrixXf &input) const {
   MatrixXf zeds = (input * _weights).rowwise() + _bias;
-  return zeds.unaryExpr(std::ref(relu));
+  return zeds.unaryExpr(std::ref(sigmoid));
 }
 
-MatrixXf ReluLayer::dActivation() {
-  return _currentZeds.unaryExpr(std::ref(dRelu));
+MatrixXf SigmoidLayer::dActivation() {
+  return _currentZeds.unaryExpr(std::ref(dSigmoid));
 }

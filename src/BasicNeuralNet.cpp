@@ -8,13 +8,13 @@
 #include <simple_nnet/BasicNeuralNet.h>
 
 Network::Network(const int inputWidth, const int outputWidth) {
-  _layers.push_back(std::make_unique<ReluLayer>(0, inputWidth, outputWidth));
+  _layers.push_back(std::make_unique<SigmoidLayer>(0, inputWidth, outputWidth));
 }
 
 void Network::addLayer(const int width) {
   int oldOutputWidth = layerSize(numLayers() - 1);
   _layers.push_back(
-      std::make_unique<ReluLayer>(_layers.size(), oldOutputWidth, width));
+      std::make_unique<SigmoidLayer>(_layers.size(), oldOutputWidth, width));
 }
 
 void Network::printStructure() const {
@@ -46,6 +46,5 @@ MatrixXf Network::feed(const MatrixXf &x) const {
   for (auto layer = _layers.begin(); layer != _layers.end(); ++layer) {
     out = layer->get()->activation(out);
   }
-  std::cout << std::endl;
   return out;
 }

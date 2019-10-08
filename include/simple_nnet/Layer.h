@@ -2,19 +2,21 @@
 #define LAYER_H
 #include <Eigen/Dense>
 #include <iostream>
+#include <math.h> 
 
 using Eigen::MatrixXf;
 using Eigen::RowVectorXf;
 
-float relu(float x);
+float sigmoid(float x);
 
-float dRelu(float x);
+float dSigmoid(float x);
+
 
 class ILayer {
 
 public:
   virtual ~ILayer(){};
-  virtual const MatrixXf &activationUpdate(const MatrixXf &input) = 0;
+  virtual const MatrixXf activationUpdate(const MatrixXf &input) = 0;
   virtual MatrixXf activation(const MatrixXf &input) const = 0;
   virtual MatrixXf dActivation() = 0;
   virtual size_t inputWidth() const = 0;
@@ -27,19 +29,19 @@ public:
   virtual const MatrixXf &delta() const = 0;
 };
 
-class ReluLayer : public ILayer {
+class SigmoidLayer : public ILayer {
 
 public:
-  ReluLayer(size_t level, const int inputWidth, const int outputWidth) {
+  SigmoidLayer(size_t level, const int inputWidth, const int outputWidth) {
     _weights = MatrixXf::Random(inputWidth, outputWidth);
     _bias = RowVectorXf::Random(outputWidth);
     _level = level;
   }
 
-  ReluLayer(size_t level, const MatrixXf &weights, const RowVectorXf &bias)
+  SigmoidLayer(size_t level, const MatrixXf &weights, const RowVectorXf &bias)
       : _weights(weights), _bias(bias), _level(level) {}
 
-  const MatrixXf &activationUpdate(const MatrixXf &input);
+  const MatrixXf activationUpdate(const MatrixXf &input);
 
   MatrixXf activation(const MatrixXf &input) const;
 
@@ -60,9 +62,10 @@ public:
   }
 
   void applyGradient(float eps) {
-    _bias -= (eps / _batchSize) * delta().colwise().sum();
+    
+    _bias -= (eps / delta().rows()) * delta().colwise().sum();
     MatrixXf weightGrad = _input.transpose() * delta();
-    _weights -= (eps / _batchSize) * weightGrad;
+    _weights -= (eps / weightGrad.rows()) * weightGrad;
   }
 
   void print() const;
@@ -73,12 +76,10 @@ public:
 
 private:
   size_t _level;
-  size_t _batchSize;
   MatrixXf _input;
   MatrixXf _weights;
   RowVectorXf _bias;
   MatrixXf _currentZeds;
-  MatrixXf _currentActivation;
   MatrixXf _delta;
 };
 

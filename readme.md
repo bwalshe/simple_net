@@ -7,8 +7,7 @@ trying to write a non-trivial C++ program, which is a language I don't use a lot
 Once compiled this program will load [MNIST digit data](http://yann.lecun.com/exdb/mnist/) (or any 
 files which use a similar format), perform one-hot encoding of the labels and then train a single hidden layer ANN against these data using back-prop. 
 
-It'll display the error rate, and then attempt to classify the first 10 entries of the test set. As there is no softmax layer, it'll probably give
-each class a score of 0.
+It'll display the error rate, and then attempt to classify the first 20 entries of the test set.
 
 # Compiling and Running
 ## Requirements
@@ -40,5 +39,6 @@ the training process as follows:
 # Things that could be improved
 * Add a softmax output layer.
 * Give more control over the learning rate, number of layers, etc.
+* Make it easy to choose between ReLU and sigmoid activation functions.
 * Annealing, adaptive learning rate, all the things that actually make neural nets viable.
 * General refactor to allow the components to be tested.

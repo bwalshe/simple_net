@@ -14,9 +14,9 @@
 #define NUM_BATCHES 10000
 #define EPOCHS 10
 #define HIDDEN_LAYER_SIZE 30
-#define GRADIENT_DELTA 0.001f
+#define GRADIENT_DELTA 3.0f
 #define DELTA_DECAY 0.6f
-#define TEST_SIZE 10
+#define TEST_SIZE 20
 
 int main(int argc, char **argv) {
   if (argc < 5) {
@@ -59,17 +59,14 @@ int main(int argc, char **argv) {
   }
 
   OneHotEncoder encoder = OneHotEncoder(10);
+  std::cout << "Label\tPredicted" << std::endl;
   for (auto i = 0; i < TEST_SIZE; ++i) {
 
     MatrixXf result = net.feed(testImages.image(i));
-
-    MatrixXf expected = encoder.encode(testImages.label(i));
-    MatrixXf errors = expected - result;
-    std::cout << "Label: " << (int)testImages.label(i)
-              << ", expected: " << expected << std::endl;
-    std::cout << "Output: " << result << std::endl;
-    std::cout << "Errors: " << errors << std::endl;
-    std::cout << "Squared norm = " << errors.squaredNorm() << std::endl;
+    MatrixXf::Index maxRow, maxCol;
+    result.maxCoeff(&maxRow, &maxCol);
+    std::cout << (int)testImages.label(i) << '\t' << maxCol 
+              << std::endl;
   }
 
   return 0;

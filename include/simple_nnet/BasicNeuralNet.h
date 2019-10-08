@@ -2,6 +2,7 @@
 #define BASIC_NEURAL_NET_H
 
 #include <memory>
+#include <vector>
 #include <simple_nnet/Layer.h>
 
 using Eigen::MatrixXf;

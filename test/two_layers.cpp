@@ -5,12 +5,16 @@
 using Eigen::MatrixXf;
 using Eigen::RowVectorXf;
 
+///
+/// This really just checkes that the layers are working together
+/// The computed numbers are a bit arbitrary.
+///
 TEST_CASE("Two layer tests", "[main]") {
   Eigen::MatrixXf w = MatrixXf::Constant(2, 2, 1);
   Eigen::RowVectorXf b = RowVectorXf::Constant(2, 1.0f);
 
-  ReluLayer l1(0, w, b);
-  ReluLayer l2(1, w, b);
+  SigmoidLayer l1(0, w, b);
+  SigmoidLayer l2(1, w, b);
 
   Eigen::MatrixXf in = MatrixXf::Constant(3, 2, 1.0f);
   Eigen::MatrixXf out1 = l1.activationUpdate(in);
@@ -24,7 +28,7 @@ TEST_CASE("Two layer tests", "[main]") {
   l2.applyGradient(0.1);
   l1.applyGradient(0.1);
 
-  Eigen::MatrixXf expectedWeights1 = MatrixXf::Constant(2, 2, 0.8f);
+  Eigen::MatrixXf expectedWeights1 = MatrixXf::Constant(2, 2, 0.99933f);
 
   REQUIRE(l1.weights().isApprox(expectedWeights1));
 }

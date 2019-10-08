@@ -16,7 +16,7 @@ public:
     _weights = MatrixXf::Constant(_inputs, outputs, 1.0);
   }
 
-  virtual const MatrixXf &activationUpdate(const MatrixXf &input) {
+  virtual const MatrixXf activationUpdate(const MatrixXf &input) {
     return _activations;
   };
   virtual MatrixXf activation(const MatrixXf &input) const {
@@ -43,22 +43,22 @@ public:
 
 TEST_CASE("Single layer tests", "[main]") {
   
-  ReluLayer l1(0, MatrixXf::Constant(2, 3, 1.0f),
+  SigmoidLayer l1(0, MatrixXf::Constant(2, 3, 1.0f),
                RowVectorXf::Constant(3, 1.0f));
   REQUIRE(l1.inputWidth() == 2);
   REQUIRE(l1.outputWidth() == 3);
 
   MatrixXf in = MatrixXf::Constant(TEST_BATCH_SIZE, 2, 1.0f);
-  MatrixXf expectedOut = MatrixXf::Constant(TEST_BATCH_SIZE, 3, 3.0);
+  MatrixXf expectedOut = MatrixXf::Constant(TEST_BATCH_SIZE, 3, sigmoid(3.0));
   MatrixXf out = l1.activationUpdate(in);
   REQUIRE(out == expectedOut);
 
-  MatrixXf expectedDAct = MatrixXf::Constant(TEST_BATCH_SIZE, 3, 1.0f);
+  MatrixXf expectedDAct = MatrixXf::Constant(TEST_BATCH_SIZE, 3, dSigmoid(3.0f));
   REQUIRE(l1.dActivation() == expectedDAct);
 
   MatrixXf errors = MatrixXf::Constant(TEST_BATCH_SIZE, 3, 1.0f);
 
-  MatrixXf expectedDelta = MatrixXf::Constant(TEST_BATCH_SIZE, 3, 1.0f);
+  MatrixXf expectedDelta = MatrixXf::Constant(TEST_BATCH_SIZE, 3, dSigmoid(3.0f));
   l1.propagate(errors);
   REQUIRE(l1.delta() == expectedDelta);
 
@@ -67,5 +67,6 @@ TEST_CASE("Single layer tests", "[main]") {
   l1.propagate(mockLayer);
 
   l1.applyGradient(1.0);
-  REQUIRE(l1.weights().isApprox(MatrixXf::Constant(2, 3, -1.0f)));
+  MatrixXf expectedWeights = MatrixXf::Constant(2, 3, 1) - in.transpose() * expectedDelta;
+  REQUIRE(l1.weights().isApprox(expectedWeights));
 }
