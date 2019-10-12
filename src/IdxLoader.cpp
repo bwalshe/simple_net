@@ -20,11 +20,15 @@ IdxContents::IdxContents(const gzFile &imageFile, const gzFile &labelFile) {
     }
     _images.push_back(
         Matrix<uint8_t, 1, Dynamic>::Map(data, imgSize).cast<float>() / 128);
+    delete data;
   }
+  gzclose(imageFile);
   _labels = std::make_unique<uint8_t[]>(_numImages);
   if (gzread(labelFile, _labels.get(), _numImages) != _numImages) {
     throw IdxLoadException("Failed to read label data.");
   }
+
+  gzclose(labelFile);
 }
 
 void IdxContents::printSummary() const {

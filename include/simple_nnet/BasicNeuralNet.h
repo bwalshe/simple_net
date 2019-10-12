@@ -1,21 +1,36 @@
-#ifndef BASIC_NEURAL_NET_H
-#define BASIC_NEURAL_NET_H
+#pragma once
 
 #include <memory>
-#include <vector>
 #include <simple_nnet/Layer.h>
+#include <vector>
 
 using Eigen::MatrixXf;
 using Eigen::RowVectorXf;
 
 class Network {
 
+  friend class NetworkBuilder;
+
 public:
-  Network(const int inputWidth, const int outputWidth);
+  class NetworkBuilder {
+    friend class Network;
+
+  public:
+    template <class T> NetworkBuilder *addLayer(size_t width) {
+      _layers.push_back(
+          std::make_unique<T>(_layers.size(), _currentOutputWidth, width));
+      _currentOutputWidth = width;
+      return this;
+    }
+    Network build();
+
+  private:
+    NetworkBuilder(size_t inputWidth) : _currentOutputWidth(inputWidth) {}
+    std::vector<std::unique_ptr<ILayer>> _layers;
+    size_t _currentOutputWidth;
+  };
 
   int layerSize(const int i) const { return _layers[i]->outputWidth(); }
-
-  void addLayer(const int width);
 
   size_t numLayers() const { return _layers.size(); }
 
@@ -25,9 +40,15 @@ public:
 
   MatrixXf feed(const MatrixXf &x) const;
 
+  static NetworkBuilder builder(size_t inputWidth);
+
 private:
+  Network(std::vector<std::unique_ptr<ILayer>> &layers) {
+    for (auto layer = layers.begin(); layer != layers.end(); ++layer) {
+      _layers.push_back(std::move(*layer));
+    }
+  }
+
   std::vector<std::unique_ptr<ILayer>> _layers;
   int inputWidth;
 };
-
-#endif // BASIC_NEURAL_NET_H

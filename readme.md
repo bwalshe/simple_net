@@ -39,6 +39,6 @@ the training process as follows:
 # Things that could be improved
 * Add a softmax output layer.
 * Give more control over the learning rate, number of layers, etc.
-* Make it easy to choose between ReLU and sigmoid activation functions.
+* ~~Make it easy to choose between ReLU and sigmoid activation functions.~~
 * Annealing, adaptive learning rate, all the things that actually make neural nets viable.
 * General refactor to allow the components to be tested.

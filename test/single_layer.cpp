@@ -6,6 +6,10 @@
 
 using Eigen::MatrixXf;
 
+float sigmoid(float x) { return 1.0f / (1.0f + exp(-x)); }
+
+float dSigmoid(float x) { return sigmoid(x) * (1 - sigmoid(x)); }
+
 class MockLayer : public ILayer {
 public:
   MockLayer(size_t inputs, size_t outputs, size_t batchSize) {
@@ -42,9 +46,9 @@ public:
 };
 
 TEST_CASE("Single layer tests", "[main]") {
-  
+
   SigmoidLayer l1(0, MatrixXf::Constant(2, 3, 1.0f),
-               RowVectorXf::Constant(3, 1.0f));
+                  RowVectorXf::Constant(3, 1.0f));
   REQUIRE(l1.inputWidth() == 2);
   REQUIRE(l1.outputWidth() == 3);
 
@@ -53,12 +57,14 @@ TEST_CASE("Single layer tests", "[main]") {
   MatrixXf out = l1.activationUpdate(in);
   REQUIRE(out == expectedOut);
 
-  MatrixXf expectedDAct = MatrixXf::Constant(TEST_BATCH_SIZE, 3, dSigmoid(3.0f));
+  MatrixXf expectedDAct =
+      MatrixXf::Constant(TEST_BATCH_SIZE, 3, dSigmoid(3.0f));
   REQUIRE(l1.dActivation() == expectedDAct);
 
   MatrixXf errors = MatrixXf::Constant(TEST_BATCH_SIZE, 3, 1.0f);
 
-  MatrixXf expectedDelta = MatrixXf::Constant(TEST_BATCH_SIZE, 3, dSigmoid(3.0f));
+  MatrixXf expectedDelta =
+      MatrixXf::Constant(TEST_BATCH_SIZE, 3, dSigmoid(3.0f));
   l1.propagate(errors);
   REQUIRE(l1.delta() == expectedDelta);
 
@@ -67,6 +73,7 @@ TEST_CASE("Single layer tests", "[main]") {
   l1.propagate(mockLayer);
 
   l1.applyGradient(1.0);
-  MatrixXf expectedWeights = MatrixXf::Constant(2, 3, 1) - in.transpose() * expectedDelta;
+  MatrixXf expectedWeights =
+      MatrixXf::Constant(2, 3, 1) - in.transpose() * expectedDelta;
   REQUIRE(l1.weights().isApprox(expectedWeights));
 }

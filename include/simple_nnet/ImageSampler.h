@@ -1,10 +1,9 @@
 #ifndef IMAGE_SAMPLER_H
 #define IMAGE_SAMPLER_H
+#include <memory>
 #include <vector>
-#include<memory>
 
 #include "IdxLoader.h"
-
 
 using Eigen::MatrixXf;
 using Eigen::RowVectorXf;
@@ -25,8 +24,9 @@ public:
     data = std::make_unique<IdxContents>(imagePath, labelPath);
   }
 
-
-  uint32_t inputWidth() const { return data->imageWidth() * data->imageHeight(); }
+  uint32_t inputWidth() const {
+    return data->imageWidth() * data->imageHeight();
+  }
 
   uint8_t targetWidth() const { return data->numClasses(); }
 

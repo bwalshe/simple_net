@@ -2,9 +2,9 @@
 #define IDX_LOADER_H
 
 #include <Eigen/Dense>
+#include <memory>
 #include <sstream>
 #include <vector>
-#include <memory>
 
 extern "C" {
 #include <zlib.h>

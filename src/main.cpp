@@ -14,7 +14,7 @@
 #define NUM_BATCHES 10000
 #define EPOCHS 10
 #define HIDDEN_LAYER_SIZE 30
-#define GRADIENT_DELTA 3.0f
+#define GRADIENT_DELTA 2.0f
 #define DELTA_DECAY 0.6f
 #define TEST_SIZE 20
 
@@ -35,8 +35,10 @@ int main(int argc, char **argv) {
             << " with " << (int)trainImages.targetWidth() << " classes"
             << std::endl;
 
-  Network net(trainImages.inputWidth(), HIDDEN_LAYER_SIZE);
-  net.addLayer(trainImages.targetWidth());
+  Network net = Network::builder(trainImages.inputWidth())
+                    .addLayer<SigmoidLayer>(HIDDEN_LAYER_SIZE)
+                    ->addLayer<SigmoidLayer>(trainImages.targetWidth())
+                    ->build();
 
 #ifdef PRINT_STATE
   net.printStructure();
@@ -65,8 +67,7 @@ int main(int argc, char **argv) {
     MatrixXf result = net.feed(testImages.image(i));
     MatrixXf::Index maxRow, maxCol;
     result.maxCoeff(&maxRow, &maxCol);
-    std::cout << (int)testImages.label(i) << '\t' << maxCol 
-              << std::endl;
+    std::cout << (int)testImages.label(i) << '\t' << maxCol << std::endl;
   }
 
   return 0;
